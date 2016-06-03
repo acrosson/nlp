@@ -5,7 +5,7 @@ from nltk.corpus import stopwords
 from gensim import corpora, models
 
 stop = stopwords.words('english')
-add_stopwords = ['said', 'mln', 'billion', 'million', 'pct', 'would']
+add_stopwords = ['said', 'mln', 'billion', 'million', 'pct', 'would', 'inc', 'company', 'corp']
 stop += add_stopwords
 
 def ie_preprocess(document):
@@ -51,7 +51,7 @@ def run():
     corpus = [dictionary.doc2bow(doc) for doc in docs]
 
     # Build LDA model
-    lda = models.LdaModel(corpus, id2word=dictionary, num_topics=5)
+    lda = models.LdaModel(corpus, id2word=dictionary, num_topics=10)
     for topic in lda.show_topics():
         print topic
 
