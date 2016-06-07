@@ -46,6 +46,7 @@ def get_entities(document):
     return entities
 
 def word_freq_dist(document):
+    """Returns a word count frequency distribution"""
     words = nltk.tokenize.word_tokenize(document)
     words = [word.lower() for word in words if word not in stop]
     fdist = nltk.FreqDist(words)
@@ -68,8 +69,12 @@ def extract_subject(document):
     return subject_nouns[0]
 
 def trained_tagger(existing=False):
+    """Returns a trained trigram tagger
+
+    existing : set to True if already trained tagger has been pickled
+    """
     if existing:
-        trigram_tagger = picke.load(open('trained_tagger.pkl', 'rb'))
+        trigram_tagger = pickle.load(open('trained_tagger.pkl', 'rb'))
         return trigram_tagger
 
     # Aggregate trained sentences for N-Gram Taggers
@@ -84,7 +89,8 @@ def trained_tagger(existing=False):
     return trigram_tagger
 
 def tag_sentences(document):
-    trigram_tagger = trained_tagger()
+    """Returns tagged sentences using POS tagging"""
+    trigram_tagger = trained_tagger(existing=True)
 
     # Tokenize Sentences and words
     sentences = tokenize_sentences(document)
