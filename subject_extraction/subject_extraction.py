@@ -126,28 +126,22 @@ def action_objects(sentence, subject):
     subject_idx = next((i for i, v in enumerate(sentence)
                     if v[0].lower() == subject), None)
     for i in range(subject_idx, len(sentence)):
-        # TODO : Find next action, don't soley look at next word
-        # Next verb might be a few words down
-        action = sentence[subject_idx+1][0]
-        action_tag = sentence[subject_idx+1][1]
-        if action_tag in VERBS:
-            for j, (obj, obj_tag) in enumerate(sentence[i+1:]):
-                if obj_tag in NOUNS:
-                    data = {
-                        'action': action,
-                        'object': obj,
-                        'phrase': sentence[i: i+j+2]
-                    }
-                    action_objects.append(data)
-                    break
-            break
-    return action_objects
+        data = {'subject': subject}
+        found_action = False
+        for j, (token, tag) in enumerate(sentence[i+1:]):
+            if tag in VERBS:
+                data['action'] = token
+                found_action = True
+            if tag in NOUNS and found_action == True:
+                data['object'] = token
+                data['phrase'] = sentence[i: i+j+2]
+                return data
+    return {}
 
 if __name__ == '__main__':
-    # url = 'http://www.huffingtonpost.com/josh-cline/to-raise-or-not-to-raisep_b_9995234.html'
-    # document = download_document(url)
-    # pickle.dump(document, open('title.pkl', 'wb'))
-    document = pickle.load(open('title.pkl', 'rb'))
+    url = ''
+    document = download_document(url)
+    # document = pickle.load(open('document.pkl', 'rb'))
     document = clean_document(document)
     subject = extract_subject(document)
     print subject
@@ -156,8 +150,6 @@ if __name__ == '__main__':
 
     action_objects = [action_objects(sentence, subject)
                         for sentence in tagged_sents]
-    for sent in action_objects:
-        for ao in sent:
-            print ao['phrase']
-
-    # extract_subject()
+    for ao in action_objects:
+        if ao:
+            print ao
