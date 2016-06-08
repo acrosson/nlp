@@ -106,6 +106,9 @@ def tag_sentences(subject, document):
     return tagged_sents
 
 def merge_multi_word_subject(sentences, subject):
+    """Merges multi word subjects into one single token
+    ex. [('steve', 'NN', ('jobs', 'NN')] -> [('steve jobs', 'NN')]
+    """
     if len(subject.split()) == 1:
         return sentences
     subject_lst = subject.split()
@@ -122,6 +125,14 @@ def merge_multi_word_subject(sentences, subject):
     return sentences
 
 def action_objects(sentence, subject):
+    """Returns a dictionary containing:
+
+    subject : the subject determined earlier
+    action : the action verb of particular related to the subject
+    object : the object the action is referring to
+    phrase : list of token, tag pairs for that lie within the indexes of
+                the variables above
+    """
     action_objects = []
     subject_idx = next((i for i, v in enumerate(sentence)
                     if v[0].lower() == subject), None)
