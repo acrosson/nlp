@@ -136,8 +136,8 @@ def get_svo(sentence, subject):
     """
     subject_idx = next((i for i, v in enumerate(sentence)
                     if v[0].lower() == subject), None)
+    data = {'subject': subject}
     for i in range(subject_idx, len(sentence)):
-        data = {'subject': subject}
         found_action = False
         for j, (token, tag) in enumerate(sentence[i+1:]):
             if tag in VERBS:
