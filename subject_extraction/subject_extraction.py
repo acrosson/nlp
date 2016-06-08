@@ -67,6 +67,7 @@ def extract_subject(document):
     # and most frequent nouns. It takes the first element in the list
     subject_nouns = [entity for entity in top_10_entities
                     if entity.split()[0] in most_freq_nouns]
+    print subject_nouns
     return subject_nouns[0]
 
 def trained_tagger(existing=False):
@@ -124,7 +125,7 @@ def merge_multi_word_subject(sentences, subject):
                     sentences[i][j] = subject
     return sentences
 
-def action_objects(sentence, subject):
+def get_svo(sentence, subject):
     """Returns a dictionary containing:
 
     subject : the subject determined earlier
@@ -133,7 +134,6 @@ def action_objects(sentence, subject):
     phrase : list of token, tag pairs for that lie within the indexes of
                 the variables above
     """
-    action_objects = []
     subject_idx = next((i for i, v in enumerate(sentence)
                     if v[0].lower() == subject), None)
     for i in range(subject_idx, len(sentence)):
@@ -159,8 +159,8 @@ if __name__ == '__main__':
 
     tagged_sents = tag_sentences(subject, document)
 
-    action_objects = [action_objects(sentence, subject)
+    svos = [get_svo(sentence, subject)
                         for sentence in tagged_sents]
-    for ao in action_objects:
-        if ao:
-            print ao
+    for svo in svos:
+        if svo:
+            print svo
