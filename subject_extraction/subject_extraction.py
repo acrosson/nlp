@@ -95,21 +95,39 @@ def tag_sentences(subject, document):
 
     # Tokenize Sentences and words
     sentences = tokenize_sentences(document)
+    merge_multi_word_subject(sentences, subject)
 
     # Filter out sentences where subject is not present
-    sentences = [sentence for sentence in sentences if subject in [word.lower() for word in sentence]]
+    sentences = [sentence for sentence in sentences if subject in
+                [word.lower() for word in sentence]]
 
     # Tag each sentence
     tagged_sents = [trigram_tagger.tag(sent) for sent in sentences]
     return tagged_sents
 
+def merge_multi_word_subject(sentences, subject):
+    if len(subject.split()) == 1:
+        return sentences
+    subject_lst = subject.split()
+    sentences_lower = [[word.lower() for word in sentence]
+                        for sentence in sentences]
+    for i, sent in enumerate(sentences_lower):
+        if subject_lst[0] in sent:
+            for j, token in enumerate(sent):
+                start = subject_lst[0] == token
+                exists = subject_lst == sent[j:j+len(subject_lst)]
+                if start and exists:
+                    del sentences[i][j+1:j+len(subject_lst)]
+                    sentences[i][j] = subject
+    return sentences
+
 def action_objects(sentence, subject):
     action_objects = []
     subject_idx = next((i for i, v in enumerate(sentence)
                     if v[0].lower() == subject), None)
-    # print subject_idx
     for i in range(subject_idx, len(sentence)):
-        # print sentence[i:]
+        # TODO : Find next action, don't soley look at next word
+        # Next verb might be a few words down
         action = sentence[subject_idx+1][0]
         action_tag = sentence[subject_idx+1][1]
         if action_tag in VERBS:
@@ -126,15 +144,18 @@ def action_objects(sentence, subject):
     return action_objects
 
 if __name__ == '__main__':
-    # url = 'http://techcrunch.com/2016/05/26/snapchat-series-f/?ncid=tcdaily'
+    # url = 'http://www.huffingtonpost.com/josh-cline/to-raise-or-not-to-raisep_b_9995234.html'
     # document = download_document(url)
-    document = pickle.load(open('document.pkl', 'rb'))
+    # pickle.dump(document, open('title.pkl', 'wb'))
+    document = pickle.load(open('title.pkl', 'rb'))
     document = clean_document(document)
     subject = extract_subject(document)
+    print subject
 
     tagged_sents = tag_sentences(subject, document)
 
-    action_objects = [action_objects(sentence, subject) for sentence in tagged_sents]
+    action_objects = [action_objects(sentence, subject)
+                        for sentence in tagged_sents]
     for sent in action_objects:
         for ao in sent:
             print ao['phrase']
