@@ -8,6 +8,8 @@ from nltk.corpus import stopwords
 stop = stopwords.words('english')
 
 # Noun Part of Speech Tags used by NLTK
+# More can be found here
+# http://www.winwaed.com/blog/2011/11/08/part-of-speech-tags/
 NOUNS = ['NN', 'NNS', 'NNP', 'NNPS']
 VERBS = ['VB', 'VBG', 'VBD', 'VBN', 'VBP', 'VBZ']
 
@@ -150,9 +152,10 @@ def get_svo(sentence, subject):
     return {}
 
 if __name__ == '__main__':
-    url = ''
+    url = 'http://www.nytimes.com/2016/06/13/us/politics/bernie-sanders-campaign.html?hp&action=click&pgtype=Homepage&clickSource=story-heading&module=first-column-region&region=top-news&WT.nav=top-news'
     document = download_document(url)
     # document = pickle.load(open('document.pkl', 'rb'))
+    print document
     document = clean_document(document)
     subject = extract_subject(document)
     print subject
