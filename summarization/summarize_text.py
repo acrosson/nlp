@@ -8,7 +8,11 @@ import xml.etree.ElementTree as ET
 from bs4 import BeautifulSoup
 from nltk.corpus import stopwords
 stop = stopwords.words('english')
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 
+# Noun Part of Speech Tags used by NLTK
+# More can be found here
+# http://www.winwaed.com/blog/2011/11/08/part-of-speech-tags/
 NOUNS = ['NN', 'NNS', 'NNP', 'NNPS']
 
 def clean_document(document):
@@ -70,7 +74,7 @@ def rank_sentences(doc, doc_matrix, feature_names, top_n=3):
     feature_names : a list of all features, the index is used to look up
                     tf-idf scores in the doc_matrix
     top_n : number of sentences to return
-    
+
     """
     sents = nltk.sent_tokenize(doc)
     sentences = [nltk.word_tokenize(sent) for sent in sents]
@@ -95,4 +99,38 @@ def rank_sentences(doc, doc_matrix, feature_names, top_n=3):
     return ranked_sents[:top_n]
 
 if __name__ == '__main__':
-    pass
+    # Load corpus data used to train the TF-IDF Transformer
+    data = pickle.load(open('data.pkl', 'rb'))
+
+    # Load the document you wish to summarize
+    title = ''
+    document = ''
+
+    cleaned_document = clean_document(document)
+    doc = remove_stop_words(cleaned_document)
+
+    # Merge corpus data and new document data
+    data = [' '.join(document) for document in data]
+    train_data = set(data + [doc])
+
+    # Fit and Transform the term frequencies into a vector
+    count_vect = CountVectorizer()
+    count_vect = count_vect.fit(train_data)
+    freq_term_matrix = count_vect.transform(train_data)
+    feature_names = count_vect.get_feature_names()
+
+    # Fit and Transform the TfidfTransformer
+    tfidf = TfidfTransformer(norm="l2")
+    tfidf.fit(freq_term_matrix)
+
+    # Get the dense tf-idf matrix for the document
+    story_freq_term_matrix = count_vect.transform([doc])
+    story_tfidf_matrix = tfidf.transform(story_freq_term_matrix)
+    story_dense = story_tfidf_matrix.todense()
+    doc_matrix = story_dense.tolist()[0]
+
+    # Get Top Ranking Sentences and join them as a summary
+    top_sents = rank_sentences(doc, doc_matrix, feature_names)
+    summary = '.'.join([cleaned_document.split('.')[i] for i in [pair[0] for pair in top_sents]])
+    summary = ' '.join(summary.split())
+    print summary
