@@ -70,7 +70,7 @@ def rank_sentences(doc, doc_matrix, feature_names, top_n=3):
     input
     ------------
     doc : a document as type str
-    doc_matrix : a dense tf-idf matrix calculated with Scikit's TfidfTransformer
+    doc_matrix : a dense tf-idf matrix calculated with Scikits TfidfTransformer
     feature_names : a list of all features, the index is used to look up
                     tf-idf scores in the doc_matrix
     top_n : number of sentences to return
@@ -78,8 +78,10 @@ def rank_sentences(doc, doc_matrix, feature_names, top_n=3):
     """
     sents = nltk.sent_tokenize(doc)
     sentences = [nltk.word_tokenize(sent) for sent in sents]
-    sentences = [[w for w in sent if nltk.pos_tag([w])[0][1] in NOUNS] for sent in sentences]
-    tfidf_sent = [[doc_matrix[feature_names.index(w.lower())] for w in sent if w.lower() in feature_names]
+    sentences = [[w for w in sent if nltk.pos_tag([w])[0][1] in NOUNS]
+                  for sent in sentences]
+    tfidf_sent = [[doc_matrix[feature_names.index(w.lower())]
+                   for w in sent if w.lower() in feature_names]
                  for sent in sentences]
 
     # Calculate Sentence Values
@@ -91,7 +93,8 @@ def rank_sentences(doc, doc_matrix, feature_names, top_n=3):
     scored_sents = np.array(sent_values) + np.array(similarity_scores)
 
     # Apply Position Weights
-    ranked_sents = [sent*(i/len(sent_values)) for i, sent in enumerate(sent_values)]
+    ranked_sents = [sent*(i/len(sent_values))
+                    for i, sent in enumerate(sent_values)]
 
     ranked_sents = [pair for pair in zip(range(len(sent_values)), sent_values)]
     ranked_sents = sorted(ranked_sents, key=lambda x: x[1] *-1)
@@ -131,6 +134,7 @@ if __name__ == '__main__':
 
     # Get Top Ranking Sentences and join them as a summary
     top_sents = rank_sentences(doc, doc_matrix, feature_names)
-    summary = '.'.join([cleaned_document.split('.')[i] for i in [pair[0] for pair in top_sents]])
+    summary = '.'.join([cleaned_document.split('.')[i]
+                        for i in [pair[0] for pair in top_sents]])
     summary = ' '.join(summary.split())
     print summary
